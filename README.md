@@ -3,5 +3,5 @@ An experiment to port an old WebGL experiment "Sanctum" to Oculus rift using Cin
 
 Here is the original http://www.felixfaire.com/Sanctum/Ely.html
 
-![Alt text](assets/SanctumVR3.png?raw=true "Optional Title")
+![Alt text](assets/SanctumVR3.PNG?raw=true)
 
