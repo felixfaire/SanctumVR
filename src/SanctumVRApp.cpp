@@ -39,11 +39,11 @@ class SanctumVRApp : public App {
 };
 
 SanctumVRApp::SanctumVRApp()
-    : mViewerPosition( 0.0f, 5.0f, 0.0f )
+    : mViewerPosition( 0.0f, 1.0f, 0.0f )
 {
     mCamUi = CameraUi( &mCam );
     mCamUi.connect( getWindow() );
-    mCam.setPerspective( 45.0f, getWindowAspectRatio(), 0.1, 10000 );
+    mCam.setPerspective( 65.0f, getWindowAspectRatio(), 0.1, 10000 );
     mCam.setEyePoint( vec3( 5.0f, 0.0f, -25.0f ) );
     mCam.lookAt( vec3( 0.0f, 8.0f, 0.0f ) );
 
@@ -78,7 +78,7 @@ void SanctumVRApp::update()
     
     // Draw from update due to conflicting WM_PAINT signal emitted by ovr_submitFrame (0.7 SDK).
     gl::clear( Color( 1.0f, 1.0f, 1.0f ) );
-    
+
     if( mRift && ! mRift->isFrameSkipped() ) {
         ScopedRiftBuffer bind{ mRift };
         
@@ -102,8 +102,8 @@ void SanctumVRApp::drawScene()
 {
 	gl::pushMatrices();
 	gl::rotate( -M_PI * 0.5f, vec3(1.0f, 0.0f, 0.0f ) );
-	gl::scale( vec3( 2.5f, 2.5f, 2.5f ) );
-	gl::translate( vec3( 8.0f *cos( getElapsedSeconds()*0.5f ), 0.0f, 15.0f * sin( getElapsedSeconds()*0.5f ) ) );
+	//gl::scale( vec3( 0.1f ); // this doesnt affect the perception of scale
+	gl::translate( vec3( 8.0f *cos( getElapsedSeconds()*0.1f ), 2.0f, 15.0f * sin( getElapsedSeconds()*0.1f ) ) );
     mSanctum.draw();
 	gl::popMatrices();
 }

@@ -100,7 +100,7 @@ public:
         drawFloor();
         drawWindowSides();
         drawWalls();
-        gl::color( 1.0f, 1.0f, 1.0f, 0.1f );
+        gl::color( 1.0f, 1.0f, 1.0f, 0.25f );
         drawLightBeams();
     }
     
