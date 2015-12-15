@@ -3,11 +3,13 @@
 #include "cinder/gl/gl.h"
 #include "cinder/ObjLoader.h"
 #include "cinder/CameraUI.h"
+#include "cinder/Log.h"
 
 #include "SanctumCathedral.h"
 
-#if CINDER_MSW
+#if defined CINDER_MSW
     #include "CinderOculus.h"
+using namespace hmd;
 #endif
 
 using namespace ci;
@@ -27,7 +29,7 @@ class SanctumVRApp : public App {
     CameraUi            mCamUi;
     SanctumCathedral    mSanctum;
     
-#if CINDER_MSW
+#if defined CINDER_MSW
     OculusRiftRef		mRift;
 #endif
     
@@ -49,7 +51,7 @@ SanctumVRApp::SanctumVRApp()
     gl::enableDepthRead();
     gl::enableAlphaBlending();
     
-  #if CINDER_MSW
+  #if defined CINDER_MSW
     try {
         mRift = OculusRift::create();
     }
@@ -60,9 +62,9 @@ SanctumVRApp::SanctumVRApp()
 }
 
 
-#if CINDER_MSW
+#if defined CINDER_MSW
 
-void BasicSampleApp::update()
+void SanctumVRApp::update()
 {
     // Move head location
     if( mRift ) {
@@ -76,7 +78,7 @@ void BasicSampleApp::update()
     gl::clear( Color( 1.0f, 1.0f, 1.0f ) );
     
     if( mRift && ! mRift->isFrameSkipped() ) {
-        ScopedRiftBuffer bind{ mRift };
+        hmd::ScopedRiftBuffer bind{ mRift };
         
         for( auto eye : mRift->getEyes() ) {
             mRift->enableEye( eye );
@@ -94,12 +96,12 @@ void BasicSampleApp::update()
     }
 }
 
-void BasicSampleApp::drawScene()
+void SanctumVRApp::drawScene()
 {
     mSanctum.draw();
 }
 
-void BasicSampleApp::draw()
+void SanctumVRApp::draw()
 {
     if( ! mRift ) {
         gl::viewport( getWindowSize() );
