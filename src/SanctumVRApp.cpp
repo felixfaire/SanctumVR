@@ -4,6 +4,8 @@
 #include "cinder/ObjLoader.h"
 #include "cinder/CameraUI.h"
 #include "cinder/Log.h"
+//#include "cinder/gl/Context.h"
+//#include "cinder/Utilities.h"
 
 #include "SanctumCathedral.h"
 
@@ -37,28 +39,28 @@ class SanctumVRApp : public App {
 };
 
 SanctumVRApp::SanctumVRApp()
-    : mViewerPosition( 0, 0, 1 )
+    : mViewerPosition( 0.0f, 5.0f, 0.0f )
 {
     mCamUi = CameraUi( &mCam );
     mCamUi.connect( getWindow() );
     mCam.setPerspective( 45.0f, getWindowAspectRatio(), 0.1, 10000 );
     mCam.setEyePoint( vec3( 5.0f, 0.0f, -25.0f ) );
     mCam.lookAt( vec3( 0.0f, 8.0f, 0.0f ) );
-    
+
     mSanctum.setupModel();
 
     gl::enableDepthWrite();
     gl::enableDepthRead();
     gl::enableAlphaBlending();
-    
-  #if defined CINDER_MSW
-    try {
-        mRift = OculusRift::create();
-    }
-    catch( const RiftExeption& exc ) {
-        CI_LOG_EXCEPTION( "Failed rift initialization.", exc );
-    }
-  #endif
+
+#if defined CINDER_MSW
+	try {
+		mRift = OculusRift::create();
+	}
+	catch (const RiftExeption& exc) {
+		CI_LOG_EXCEPTION("Failed rift initialization.", exc);
+	}
+#endif
 }
 
 
@@ -69,7 +71,7 @@ void SanctumVRApp::update()
     // Move head location
     if( mRift ) {
         auto host = mRift->getHostCamera();
-        host.setEyePoint( mViewerPosition + vec3( 0.5f * sin( app::getElapsedSeconds() ), 0, 0 ) );
+        host.setEyePoint( mViewerPosition );
         host.lookAt( vec3( 0 ) );
         mRift->setHostCamera( host );
     }
@@ -78,7 +80,7 @@ void SanctumVRApp::update()
     gl::clear( Color( 1.0f, 1.0f, 1.0f ) );
     
     if( mRift && ! mRift->isFrameSkipped() ) {
-        hmd::ScopedRiftBuffer bind{ mRift };
+        ScopedRiftBuffer bind{ mRift };
         
         for( auto eye : mRift->getEyes() ) {
             mRift->enableEye( eye );
@@ -98,7 +100,12 @@ void SanctumVRApp::update()
 
 void SanctumVRApp::drawScene()
 {
+	gl::pushMatrices();
+	gl::rotate( -M_PI * 0.5f, vec3(1.0f, 0.0f, 0.0f ) );
+	gl::scale( vec3( 2.5f, 2.5f, 2.5f ) );
+	gl::translate( vec3( 8.0f *cos( getElapsedSeconds()*0.5f ), 0.0f, 15.0f * sin( getElapsedSeconds()*0.5f ) ) );
     mSanctum.draw();
+	gl::popMatrices();
 }
 
 void SanctumVRApp::draw()
@@ -128,4 +135,16 @@ void SanctumVRApp::draw()
 }
 #endif
 
-CINDER_APP( SanctumVRApp, RendererGl )
+void prepareSettings(App::Settings *settings)
+{
+	try{
+		RiftManager::initialize();
+	}
+	catch (const RiftExeption& exc) {
+		CI_LOG_EXCEPTION("Failed ovr initialization", exc);
+	}
+	settings->setTitle("Sanctum VR");
+	settings->setWindowSize(1920 / 2, 1080 / 2);
+}
+
+CINDER_APP( SanctumVRApp, RendererGl(RendererGl::Options().msaa(0)), prepareSettings)
