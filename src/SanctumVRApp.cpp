@@ -6,25 +6,36 @@
 
 #include "SanctumCathedral.h"
 
+#if CINDER_MSW
+    #include "CinderOculus.h"
+#endif
+
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 
 class SanctumVRApp : public App {
   public:
-	void setup() override;
-	void mouseDown( MouseEvent event ) override;
+    SanctumVRApp();
+    
 	void update() override;
 	void draw() override;
+  private:
+    void drawScene();
     
     CameraPersp         mCam;
     CameraUi            mCamUi;
     SanctumCathedral    mSanctum;
     
-    gl::BatchRef        mSphere;
+#if CINDER_MSW
+    OculusRiftRef		mRift;
+#endif
+    
+    vec3                mViewerPosition;
 };
 
-void SanctumVRApp::setup()
+SanctumVRApp::SanctumVRApp()
+    : mViewerPosition( 0, 0, 1 )
 {
     mCamUi = CameraUi( &mCam );
     mCamUi.connect( getWindow() );
@@ -33,21 +44,77 @@ void SanctumVRApp::setup()
     mCam.lookAt( vec3( 0.0f, 8.0f, 0.0f ) );
     
     mSanctum.setupModel();
-    
-    mSphere = gl::Batch::create( geom::Sphere().radius( 1.0f ).center( vec3( 0.0f ) ), gl::getStockShader( gl::ShaderDef().color() ) );
-    
+
     gl::enableDepthWrite();
     gl::enableDepthRead();
     gl::enableAlphaBlending();
+    
+  #if CINDER_MSW
+    try {
+        mRift = OculusRift::create();
+    }
+    catch( const RiftExeption& exc ) {
+        CI_LOG_EXCEPTION( "Failed rift initialization.", exc );
+    }
+  #endif
 }
 
-void SanctumVRApp::mouseDown( MouseEvent event )
+
+#if CINDER_MSW
+
+void BasicSampleApp::update()
 {
+    // Move head location
+    if( mRift ) {
+        auto host = mRift->getHostCamera();
+        host.setEyePoint( mViewerPosition + vec3( 0.5f * sin( app::getElapsedSeconds() ), 0, 0 ) );
+        host.lookAt( vec3( 0 ) );
+        mRift->setHostCamera( host );
+    }
+    
+    // Draw from update due to conflicting WM_PAINT signal emitted by ovr_submitFrame (0.7 SDK).
+    gl::clear( Color( 1.0f, 1.0f, 1.0f ) );
+    
+    if( mRift && ! mRift->isFrameSkipped() ) {
+        ScopedRiftBuffer bind{ mRift };
+        
+        for( auto eye : mRift->getEyes() ) {
+            mRift->enableEye( eye );
+            
+            drawScene();
+            
+            // Draw positional tracking camera frustum
+            CameraPersp positional;
+            if( mRift->getPositionalTrackingCamera( &positional ) ) {
+                gl::setModelMatrix( mat4() );
+                gl::lineWidth( 1.0f );
+                gl::drawFrustum( positional );
+            }
+        }
+    }
 }
 
-void SanctumVRApp::update()
+void BasicSampleApp::drawScene()
 {
+    mSanctum.draw();
 }
+
+void BasicSampleApp::draw()
+{
+    if( ! mRift ) {
+        gl::viewport( getWindowSize() );
+        gl::setMatrices( mCam );
+        
+        drawScene();
+    }
+}
+
+
+
+#else // is OSX
+
+void SanctumVRApp::update(){}
+void SanctumVRApp::drawScene(){}
 
 void SanctumVRApp::draw()
 {
@@ -56,9 +123,7 @@ void SanctumVRApp::draw()
     gl::setMatrices( mCam );
     
     mSanctum.draw();
-
-//    gl::color( 0.0f, 0.0f, 0.0f );
-//    mSphere->draw();
 }
+#endif
 
 CINDER_APP( SanctumVRApp, RendererGl )
