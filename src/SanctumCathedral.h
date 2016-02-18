@@ -28,47 +28,193 @@ public:
         format.enableMipmapping( true );
         format.setMaxAnisotropy( 32.0f );
         
-        gl::ShaderDef glsl = gl::ShaderDef().texture().color();
+        gl::ShaderDef glsl  = gl::ShaderDef().texture().color();
         
-        ObjLoader           vault( loadAsset( "obj/ArchElement.obj" ) );
-        mVaultPipingTex =   gl::Texture::create( loadImage( loadAsset( "textures/ElyCeiling.png" ) ), format );
-        mVaultTex =         gl::Texture::create( loadImage( loadAsset( "textures/ElyCeilingBack.jpg" ) ), format );
-        mVault =            gl::Batch::create( vault, gl::getStockShader( glsl ) );
+        mVaultPipingTex     = gl::Texture::create( loadImage( loadAsset( "textures/ElyCeiling.png" ) ), format );
+        mVaultTex           = gl::Texture::create( loadImage( loadAsset( "textures/ElyCeilingBack.jpg" ) ), format );
+        mVault              = gl::Batch::create( createCeilingGeometry(), gl::getStockShader( glsl ) );
         
-        ObjLoader           side( loadAsset( "obj/WindowSide.obj" ) );
-        mWindowSidesTex =   gl::Texture::create( loadImage( loadAsset( "textures/ArchSides.jpg" ) ), format );
-        mWindowSides =      gl::Batch::create( side, gl::getStockShader( glsl ) );
+        mWindowSidesTex     = gl::Texture::create( loadImage( loadAsset( "textures/ArchSides.jpg" ) ), format );
+        mWindowSides        = gl::Batch::create( createWindowSidesGeometry(), gl::getStockShader( glsl ) );
 
-        mMainWindowsTex =   gl::Texture::create( loadImage( loadAsset( "textures/ElyEndWindows.jpg" ) ), format );
-        mMainWindows =      gl::Batch::create( geom::Plane().size( vec2( 27.15f, 37.31f ) )
-                                                            .normal( vec3( 0.0f, 0.0f, -1.0f ) ),
-                                               gl::getStockShader( glsl ) );
+        mMainWindowsTex     = gl::Texture::create( loadImage( loadAsset( "textures/ElyEndWindows.jpg" ) ), format );
+        mMainWindows        = gl::Batch::create( createMainWindowGeometry(),
+                                                 gl::getStockShader( glsl ) );
         
-        mFloorTex =         gl::Texture::create( loadImage( loadAsset( "textures/ElyFloor.jpg" ) ), format );
-        mFloor =            gl::Batch::create( geom::Plane().size( vec2( 27.15f, 60.96f ) )
-                                                            .normal( vec3( 0.0f, -1.0f, 0.0f ) ),
-                                               gl::getStockShader( glsl ) );
+        mFloorTex           = gl::Texture::create( loadImage( loadAsset( "textures/ElyFloor.jpg" ) ), format );
+        mFloor              = gl::Batch::create( geom::Plane().size( vec2( 27.15f, 60.96f ) )
+                                                              .normal( vec3( 0.0f, -1.0f, 0.0f ) )
+                                                              >> geom::Translate( 0.0f, -6.6f, 0.0f ),
+                                                 gl::getStockShader( glsl ) );
        
-        mWindowMullionsTex =gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsBack2.png" ) ), format );
-        mWindowPanesTex =   gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsBack.jpg" ) ), format );
-        mCentreMullionsTex =gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsCentre2.png" ) ), format );
-        mCentrePanesTex =   gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsCentre.jpg" ) ), format );
-        mWindows =          gl::Batch::create( geom::Plane().size( vec2( 12.19f, 37.31f ) )
-                                                            .normal( vec3( 1.0f, 0.0f, 0.0f ) ),
-                                               gl::getStockShader( glsl ) );
+        mWindowPanesTex     = gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsBack.jpg" ) ), format );
+        mWindowPanes        = gl::Batch::create( createWindowPanesGeometry(), gl::getStockShader( glsl ) );
+        mWindowMullionsTex  = gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsBack2.png" ) ), format );
+        mWindowMullions     = gl::Batch::create( createWindowMullionsGeometry(), gl::getStockShader( glsl ) );
+        mCentreMullionsTex  = gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsCentre2.png" ) ), format );
+        mCentreMullions     = gl::Batch::create( createCentreMullionsGeometry(), gl::getStockShader( glsl ) );
+        mCentrePanesTex     = gl::Texture::create( loadImage( loadAsset( "textures/ElySideWindowsCentre.jpg" ) ), format );
+        mCentrePanes        = gl::Batch::create( createCentrePanesGeometry(), gl::getStockShader( glsl ) );
         
-        mEndColumnsTex =   gl::Texture::create( loadImage( loadAsset( "textures/ElyEndColumns.jpg" ) ), format );
-        mEndColumns =      gl::Batch::create( geom::Plane().size( vec2( 4.0f, 30.02f ) )
-                                                           .normal( vec3( 0.0f, 0.0f, -1.0f ) ),
-                                              gl::getStockShader( glsl ) );
+        mEndColumnsTex      = gl::Texture::create( loadImage( loadAsset( "textures/ElyEndColumns.jpg" ) ), format );
+        mEndColumns         = gl::Batch::create( createEndColumGeometry(), gl::getStockShader( glsl ) );
         
-        mWallsTex =        gl::Texture::create( loadImage( loadAsset( "textures/ElySideWalls.png" ) ), format );
-        mWalls =           gl::Batch::create( geom::Plane().size( vec2( 12.19f, 37.31f ) )
-                                                           .normal( vec3( 1.0f, 0.0f, 0.0f ) ),
-                                              gl::getStockShader( glsl ) );
+        mWallsTex           = gl::Texture::create( loadImage( loadAsset( "textures/ElySideWalls.png" ) ), format );
+        mWalls              = gl::Batch::create( createWallsGeometry(), gl::getStockShader( glsl ) );
         
+        mLightTex           = gl::Texture::create( loadImage( loadAsset( "textures/LightBeam.png" ) ), format );
+        mLight              = gl::Batch::create( createLightGeometry(), gl::getStockShader( glsl ) );
+    
+    }
+    
+    void draw()
+    {
+        gl::enableAlphaBlending();
+        gl::color( 1.0f, 1.0f, 1.0f, 1.0f );
+        drawMainWindows();
+        drawEndColumns();
+        drawCeiling();
+        drawSideWindows();
+        drawFloor();
+        drawWindowSides();
+        drawWalls();
+        gl::color( 1.0f, 1.0f, 1.0f, 0.15f );
+        drawLightBeams();
+    }
+    
+    
+private:
+    
+    // GEOMETRY FUNCTIONS ////////////////////////////////////////////////////
+    
+    geom::SourceMods createCeilingGeometry()
+    {
+        ObjLoader vaultGeom( loadAsset( "obj/ArchElement.obj" ) );
+        geom::SourceMods arches;
         
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                arches &= vaultGeom
+                       >> geom::Rotate(  (j > 0 ? -1.0f : 1.0f) * M_PI * 0.5f, vec3( 0.0f, 1.0f, 0.0f ) )
+                       >> geom::Translate( 0.0f, 31.71f, 24.38f - (float)i * 12.19f );
+            }
+        }
+        return arches;
+    }
+    
+    geom::SourceMods createMainWindowGeometry()
+    {
+        geom::SourceMods mainWindows;
+        
+        for (int i = 0; i < 2; i++)
+            mainWindows &= geom::Plane().size( vec2( 27.15f, 37.31f ) ).normal( vec3( 0.0f, 0.0f, -1.0f ) )
+                        >> geom::Translate( 0.0f, 12.0f, 30.48f )
+                        >> geom::Rotate( M_PI * (float)i, vec3( 0.0f, 1.0f, 0.0f ) );
+        
+        return mainWindows;
+    }
+    
+    geom::SourceMods createWindowPanesGeometry()
+    {
+        geom::SourceMods windowPanes;
+    
+        for (int i = -2; i < 3; i++)
+            for (int j = -1; j < 2; j++)
+                if (i != 0 && j != 0)
+                    windowPanes &= geom::Plane().size( vec2( 12.19f, 37.31f ) ).normal( vec3( 1.0f, 0.0f, 0.0f ) )
+                                >> geom::Rotate( (float)M_PI * 0.5, vec3( -1.0f, 0.0f, 0.0f ) )
+                                >> geom::Translate( (float)j * 14.99f, 12.0f, (float)i * 12.19f );
 
+        return windowPanes;
+    }
+    
+    geom::SourceMods createWindowMullionsGeometry()
+    {
+        geom::SourceMods windowMullions;
+    
+        for (int i = -2; i < 3; i++)
+            for (int j = -1; j < 2; j++)
+                if (i != 0 && j != 0)
+                    windowMullions &= geom::Plane().size( vec2( 12.19f, 37.31f ) ).normal( vec3( 1.0f, 0.0f, 0.0f ) )
+                                   >> geom::Rotate( (float)M_PI * 0.5, vec3( -1.0f, 0.0f, 0.0f ) )
+                                   >> geom::Translate( (float)j * 14.77f, 12.0f, (float)i * 12.19f );
+
+        return windowMullions;
+    }
+    
+    geom::SourceMods createCentrePanesGeometry()
+    {
+        geom::SourceMods centrePanes;
+    
+        for (int i = -1 ; i < 2; i++)
+            if (i != 0)
+                centrePanes &= geom::Plane().size( vec2( 12.19f, 37.31f ) ).normal( vec3( 1.0f, 0.0f, 0.0f ) )
+                            >> geom::Rotate( (float)M_PI * 0.5, vec3( -1.0f, 0.0f, 0.0f ) )
+                            >> geom::Translate( (float)i * 14.99, 12.0f, -0.15f );
+        
+        return centrePanes;
+    }
+    
+    geom::SourceMods createCentreMullionsGeometry()
+    {
+        geom::SourceMods centreMullions;
+    
+        for (int i = -1 ; i < 2; i++)
+            if (i != 0)
+                centreMullions &= geom::Plane().size( vec2( 12.19f, 37.31f ) ).normal( vec3( 1.0f, 0.0f, 0.0f ) )
+                               >> geom::Rotate( (float)M_PI * 0.5, vec3( -1.0f, 0.0f, 0.0f ) )
+                               >> geom::Translate( (float)i * 14.77, 12.0f, -0.15f );
+        
+        return centreMullions;
+    }
+    
+    geom::SourceMods createEndColumGeometry()
+    {
+        geom::SourceMods endColums;
+        
+        for (int i = -1; i < 2; i++)
+            for (int j = -1; j < 2; j++)
+                if (j != 0 && i != 0)
+                    endColums &= geom::Plane().size( vec2( 4.0f, 30.02f ) ).normal( vec3( 0.0f, 0.0f, -1.0f ) )
+                              >> geom::Translate( (float)i * 11.6f, 8.46f, (float)j * 30.0f );
+        
+        return endColums;
+    }
+
+    geom::SourceMods createWindowSidesGeometry()
+    {
+        geom::SourceMods windowSides;
+        ObjLoader side( loadAsset( "obj/WindowSide.obj" ) );
+        
+        for (int i = 0; i < 5; i++)
+            for (int j = 0; j < 2; j++)
+                    windowSides &= side
+                                >> geom::Rotate( (j > 0 ? 1.0f : -1.0f) * (float)M_PI * 0.5f, vec3( 0.0f, 1.0f, 0.0f ) )
+                                >> geom::Translate( j > 0 ? -13.57f : 13.57f, 26.91f, 24.38 - (float)i * 12.19f );
+        
+        return windowSides;
+    }
+    
+    geom::SourceMods createWallsGeometry()
+    {
+        geom::SourceMods walls;
+        
+        for (int i = -2; i < 3; i++)
+            for (int j = -1; j < 2; j++)
+                if (j != 0)
+                    walls &= geom::Plane().size( vec2( 12.19f, 37.31f ) ).normal( vec3( 1.0f, 0.0f, 0.0f ) )
+                          >> geom::Rotate( (float)M_PI * 0.5, vec3( -1.0f, 0.0f, 0.0f ) )
+                          >> geom::Translate( (float)j * 13.57f, 12.0f, (float)i * 12.19f );
+        
+        return walls;
+    }
+    
+    geom::SourceMods createLightGeometry()
+    {
+        geom::SourceMods lightGeometry;
+        
         gl::VertBatchRef lightMesh = gl::VertBatch::create( GL_TRIANGLES );
         lightMesh->begin( GL_TRIANGLE_STRIP );
         lightMesh->texCoord( 1.0f, 1.0f );
@@ -84,204 +230,80 @@ public:
         lightMesh->vertex( vec3( -7.6, -6.0, -3.5 ) );
         lightMesh->end();
         
-        mLightTex =        gl::Texture::create( loadImage( loadAsset( "textures/LightBeam.png" ) ), format );
-        mLightMesh =       gl::VboMesh::create( *lightMesh.get() );
-        mLight =           gl::Batch::create( mLightMesh, gl::getStockShader( glsl ) );
-    
+        for (int i = 0; i < 4; i++)
+        {
+            lightGeometry &= *lightMesh.get()
+                          >> geom::Translate( -1.0f, 0.0f, 19.5f - 13.22f * (float)i );
+        }
+        
+        return lightGeometry;
     }
-    
-    void draw()
-    {
-        gl::color( 1.0f, 1.0f, 1.0f, 1.0f );
-        drawMainWindows();
-        drawEndColumns();
-        drawCeiling();
-        drawSideWindows();
-        drawFloor();
-        drawWindowSides();
-        drawWalls();
-        gl::color( 1.0f, 1.0f, 1.0f, 0.25f );
-        drawLightBeams();
-    }
+
+    // DRAWING FUNCTIONS ////////////////////////////////////////////////////
     
     void drawCeiling()
     {
         mVaultTex->bind();
-        for (int i = 0; i < 5; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                gl::pushMatrices();
-                gl::translate( vec3( 0.0f, 31.71f, 24.38f - (float)i * 12.19f ) );
-                gl::rotate( (j > 0 ? -1.0f : 1.0f) * M_PI * 0.5f, 0.0f, 1.0f, 0.0f );
-                
-                mVault->draw();
-                gl::popMatrices();
-            }
-        }
+        mVault->draw();
         
         mVaultPipingTex->bind();
-        for (int i = 0; i < 5; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                gl::pushMatrices();
-                gl::translate( vec3( 0.0f, 31.51f, 24.38f - (float)i * 12.19f ) );
-                gl::rotate( (j > 0 ? -1.0f : 1.0f) * M_PI * 0.5f, 0.0f, 1.0f, 0.0f );
-                
-                mVault->draw();
-                gl::popMatrices();
-            }
-        }
+        gl::pushMatrices();
+        gl::translate( vec3( 0.0f, -0.2f, 0.0f ) );
+        mVault->draw();
+        gl::popMatrices();
     }
     
     void drawMainWindows()
     {
         mMainWindowsTex->bind();
-        for (int i = 0; i < 2; i++)
-        {
-            gl::pushMatrices();
-            gl::rotate( M_PI * (float)i, vec3( 0.0f, 1.0f, 0.0f ) );
-            gl::translate( vec3( 0.0f, 12.0f, 30.48f ) );
-            mMainWindows->draw();
-            gl::popMatrices();
-        }
+        mMainWindows->draw();
     }
     
     void drawSideWindows()
     {
         mWindowPanesTex->bind();
-        for (int i = -2; i < 3; i++)
-        {
-            for (int j = -1; j < 2; j++)
-            {
-                if (i != 0 && j != 0)
-                {
-                    gl::pushMatrices();
-                    gl::translate( vec3( (float)j * 14.99f, 12.0f, (float)i * 12.19f ) );
-                    gl::rotate( (float)M_PI * 0.5, -1.0f, 0.0f, 0.0f );
-                    mWindows->draw();
-                    gl::popMatrices();
-                }
-            }
-        }
+        mWindowPanes->draw();
         
         mWindowMullionsTex->bind();
-        for (int i = -2; i < 3; i++)
-        {
-            for (int j = -1; j < 2; j++)
-            {
-                if (i != 0 && j != 0)
-                {
-                    gl::pushMatrices();
-                    gl::translate( vec3( (float)j * 14.77f, 12.0f, (float)i * 12.19f ) );
-                    gl::rotate( (float)M_PI * 0.5, -1.0f, 0.0f, 0.0f );
-                    mWindows->draw();
-                    gl::popMatrices();
-                }
-            }
-        }
+        mWindowMullions->draw();
         
         mCentrePanesTex->bind();
-        for (int i = -1 ; i < 2; i++)
-        {
-            if (i != 0)
-            {
-                gl::pushMatrices();
-                gl::translate( vec3( (float)i * 14.99, 12.0f, -0.15f ) );
-                gl::rotate( (float)M_PI * 0.5, -1.0f, 0.0f, 0.0f );
-                mWindows->draw();
-                gl::popMatrices();
-            }
-        }
+        mCentrePanes->draw();
         
         mCentreMullionsTex->bind();
-        for (int i = -1 ; i < 2; i++)
-        {
-            if (i != 0)
-            {
-                gl::pushMatrices();
-                gl::translate( vec3( (float)i * 14.77, 12.0f, -0.15f ) );
-                gl::rotate( (float)M_PI * 0.5, -1.0f, 0.0f, 0.0f );
-                mWindows->draw();
-                gl::popMatrices();
-            }
-        }
+        mCentreMullions->draw();
     }
     
     void drawFloor()
     {
         mFloorTex->bind();
-        gl::pushMatrices();
-        gl::translate( vec3( 0.0f, -6.6f, 0.0f ) );
         mFloor->draw();
-        gl::popMatrices();
     }
     
     void drawEndColumns()
     {
         gl::disableDepthWrite();
         mEndColumnsTex->bind();
-        for (int i = -1; i < 2; i++)
-        {
-            for (int j = -1; j < 2; j++)
-            {
-                if (j != 0 && i != 0)
-                {
-                    gl::pushMatrices();
-                    gl::translate( vec3( (float)i * 11.6f, 8.46f, (float)j * 30.0f ) );
-                    mEndColumns->draw();
-                    gl::popMatrices();
-                }
-            }
-        }
+        mEndColumns->draw();
         gl::enableDepthWrite();
     }
     
     void drawWindowSides()
     {
         mWindowSidesTex->bind();
-        for (int i = 0; i < 5; i++)
-        {
-            for (int j = 0; j < 2; j++)
-            {
-                gl::pushMatrices();
-                gl::translate( vec3( j > 0 ? -13.57f : 13.57f, 26.91f, 24.38 - (float)i * 12.19f ) );
-                gl::rotate( (j > 0 ? 1.0f : -1.0f) * (float)M_PI * 0.5f, 0.0f, 1.0f, 0.0f );
-                mWindowSides->draw();
-                gl::popMatrices();
-            }
-        }
+        mWindowSides->draw();
     }
     
     void drawWalls()
     {
         mWallsTex->bind();
-        for (int i = -2; i < 3; i++){
-            for (int j = -1; j < 2; j++)
-            {
-                if (j != 0)
-                {
-                    gl::pushMatrices();
-                    gl::translate( vec3( (float)j * 13.57f, 12.0f, (float)i * 12.19f ) );
-                    gl::rotate( (float)M_PI * 0.5, -1.0f, 0.0f, 0.0f );
-                    mWalls->draw();
-                    gl::popMatrices();
-                }
-            }
-        }
+        mWalls->draw();
     }
     
     void drawLightBeams()
     {
         mLightTex->bind();
-        for (int i = 0; i < 4; i++)
-        {
-            gl::pushMatrices();
-            gl::translate( vec3( -1.0f, 0.0f, 19.5f - 13.22f * (float)i ) );
-            mLight->draw();
-            gl::popMatrices();
-        }
+        mLight->draw();
     }
     
     gl::BatchRef        mVault;
@@ -294,10 +316,16 @@ public:
     gl::BatchRef        mFloor;
     gl::TextureRef      mFloorTex;
     
-    gl::BatchRef        mWindows;
+    gl::BatchRef        mWindowPanes;
     gl::TextureRef      mWindowPanesTex;
+
+    gl::BatchRef        mWindowMullions;
     gl::TextureRef      mWindowMullionsTex;
+    
+    gl::BatchRef        mCentrePanes;
     gl::TextureRef      mCentrePanesTex;
+    
+    gl::BatchRef        mCentreMullions;
     gl::TextureRef      mCentreMullionsTex;
     
     gl::BatchRef        mEndColumns;
@@ -309,7 +337,6 @@ public:
     gl::BatchRef        mWalls;
     gl::TextureRef      mWallsTex;
     
-    gl::VboMeshRef      mLightMesh;
     gl::BatchRef        mLight;
     gl::TextureRef      mLightTex;
     
